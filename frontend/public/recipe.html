@@ -3,12 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Recipe</title>
+    <title>Recipe Details</title>
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-    <div class="container" id="recipeDetails"></div>
 
-    <script src="../scripts/recipes.js"></script>
+    <div class="sidebar">
+        <a href="dashboard.html">Home</a>
+        <a href="add-recipe.html">Add Recipe</a>
+        <a href="#" id="logout">Logout</a>
+    </div>
+
+    <div class="container">
+        <div class="recipe-card-detail" id="recipeDetails"></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const recipeId = urlParams.get("id");
+
+            if (!recipeId) {
+                document.getElementById("recipeDetails").innerHTML = "<p>Error: Recipe not found.</p>";
+                return;
+            }
+
+            fetch(`http://localhost:5000/api/recipes/${recipeId}`)
+                .then(response => response.json())
+                .then(recipe => {
+                    document.getElementById("recipeDetails").innerHTML = `
+                        <div class="recipe-content">
+                            <img src="${recipe.image || 'https://via.placeholder.com/500'}" alt="Recipe Image">
+                            <h1>${recipe.title}</h1>
+                            <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
+                            <p><strong>Instructions:</strong> ${recipe.instructions}</p>
+                        </div>
+                    `;
+                })
+                .catch(error => {
+                    console.error("Error loading recipe:", error);
+                    document.getElementById("recipeDetails").innerHTML = "<p>Error loading recipe.</p>";
+                });
+        });
+
+        // Логаут
+        document.getElementById("logout").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        });
+    </script>
 </body>
 </html>

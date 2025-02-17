@@ -7,17 +7,30 @@
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Add New Recipe</h1>
-        <form id="recipeForm">
-            <input type="text" id="title" placeholder="Recipe Title" required>
-            <textarea id="ingredients" placeholder="Ingredients (comma-separated)" required></textarea>
-            <textarea id="instructions" placeholder="Instructions" required></textarea>
-            <button type="submit">Add Recipe</button>
-        </form>
+    <div class="sidebar">
+        <a href="dashboard.html">Home</a>
+        <a href="add-recipe.html" class="active">Add Recipe</a>
+        <a href="#" id="logout">Logout</a>
     </div>
 
+    <div class="container">
+        <div class="form-container">
+            <h1>Add New Recipe</h1>
+            <form id="recipeForm">
+                <input type="text" id="title" placeholder="Recipe Title" required>
+                <textarea id="ingredients" placeholder="Ingredients (comma-separated)" required></textarea>
+                <textarea id="instructions" placeholder="Instructions" required></textarea>
+                <button type="submit">Add Recipe</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.getElementById("logout").addEventListener("click", () => {
+            localStorage.removeItem("token");
+            window.location.href = "index.html";
+        });
+    </script>
     <script src="../scripts/recipes.js"></script>
+    <script src="../scripts/logout.js"></script>
 </body>
 </html>
-

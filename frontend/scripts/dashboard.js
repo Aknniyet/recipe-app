@@ -21,14 +21,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 const recipeCard = document.createElement('div');
                 recipeCard.className = 'recipe-card';
                 recipeCard.innerHTML = `
-                    <h3>${recipe.title}</h3>
-                    <button class="view-recipe" data-id="${recipe._id}">View</button>
-                    <button class="delete-recipe" data-id="${recipe._id}">Delete</button>
+                    <img src="${recipe.image || 'https://via.placeholder.com/300'}" alt="Recipe Image">
+                    <div class="recipe-card-content">
+                        <h3>${recipe.title}</h3>
+                        <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                    </div>
+                    <div class="buttons">
+                        <button class="view-recipe" data-id="${recipe._id}">View More</button>
+                        <button class="delete-recipe" data-id="${recipe._id}">Delete</button>
+                    </div>
                 `;
                 recipeList.appendChild(recipeCard);
             });
 
-            // Добавляем обработчики событий для кнопок после их создания
+            // Обработчики событий для кнопок View More
             document.querySelectorAll('.view-recipe').forEach(button => {
                 button.addEventListener('click', (e) => {
                     const recipeId = e.target.getAttribute('data-id');
@@ -36,6 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
 
+            // Обработчики событий для кнопок Delete
             document.querySelectorAll('.delete-recipe').forEach(button => {
                 button.addEventListener('click', async (e) => {
                     const recipeId = e.target.getAttribute('data-id');
@@ -52,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadRecipes();
 });
 
-// Функция просмотра рецепта (Обновлено)
+// Функция просмотра рецепта
 async function viewRecipe(id) {
     try {
         const response = await fetch(`http://localhost:5000/api/recipes/${id}`);
@@ -62,13 +69,13 @@ async function viewRecipe(id) {
         const recipe = await response.json();
 
         localStorage.setItem('currentRecipe', JSON.stringify(recipe));
-        window.location.href = 'recipe.html';
+        window.location.href = `recipe.html`;
     } catch (error) {
         alert(error.message);
     }
 }
 
-// Функция удаления рецепта (Обновлено)
+// Функция удаления рецепта
 async function deleteRecipe(id) {
     const confirmDelete = confirm('Are you sure you want to delete this recipe?');
     if (!confirmDelete) return;
@@ -78,7 +85,6 @@ async function deleteRecipe(id) {
         alert('You are not authenticated!');
         return;
     }
-
     const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
         method: 'DELETE',
         headers: {
@@ -88,7 +94,7 @@ async function deleteRecipe(id) {
 
     if (response.ok) {
         alert('Recipe deleted successfully!');
-        loadRecipes(); // Загружаем рецепты снова без перезагрузки страницы
+        location.reload(); // Перезагружаем страницу после удаления
     } else {
         alert('Failed to delete recipe.');
     }
