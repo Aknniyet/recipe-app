@@ -7,6 +7,42 @@ body {
     height: 100vh;
 }
 
+/* Search Bar Container */
+.search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Adds spacing between input and button */
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+/* Search Input */
+.search-bar {
+    width: 500px;
+    padding: 8px;
+    border: 2px solid #ff6600;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Search Button */
+.search-button {
+    background-color: #ff6600;
+    width: 300px;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: 16px;
+    min-width: 100px;
+}
+
+.search-button:hover {
+    background-color: #e65c00;
+}
+
 .sidebar {
     width: 250px;
     background-color: #f8f9fa;
