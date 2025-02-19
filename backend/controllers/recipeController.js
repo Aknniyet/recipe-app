@@ -51,32 +51,45 @@ exports.getRecipes = async (req, res) => {
 // Получение рецепта по ID
 exports.getRecipeById = async (req, res) => {
     try {
-        const recipe = await Recipe.findById(req.params.id).populate('createdBy', 'username');
-        if (!recipe) return res.status(404).json({ message: 'Рецепт не найден' });
+        const recipe = await Recipe.findById(req.params.id).populate('createdBy', 'username _id');
+        if (!recipe) return res.status(404).json({ message: "Recipe not found" });
 
         res.json(recipe);
     } catch (error) {
-        res.status(500).json({ message: 'Ошибка при поиске рецепта' });
+        res.status(500).json({ message: "Error fetching recipe" });
     }
 };
 
-// Обновление рецепта
+// Обновление рецепта с изображением
 exports.updateRecipe = async (req, res) => {
     try {
         const recipe = await Recipe.findById(req.params.id);
-        if (!recipe) return res.status(404).json({ message: 'Рецепт не найден' });
+        if (!recipe) return res.status(404).json({ message: "Recipe not found" });
 
         if (recipe.createdBy.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'Нет доступа' });
+            return res.status(403).json({ message: "Access denied" });
         }
 
-        Object.assign(recipe, req.body);
+        console.log("Пришли данные на обновление:", req.body);
+
+        // Обновление данных рецепта
+        recipe.title = req.body.title || recipe.title;
+        recipe.ingredients = req.body.ingredients ? req.body.ingredients.split(",") : recipe.ingredients;
+        recipe.instructions = req.body.instructions || recipe.instructions;
+
+        // Если новое изображение загружено
+        if (req.file) {
+            recipe.image = `/uploads/${req.file.filename}`;
+        }
+
         await recipe.save();
-        res.json(recipe);
+        res.json({ message: "Recipe updated successfully!", recipe });
     } catch (error) {
-        res.status(500).json({ message: 'Ошибка при обновлении рецепта' });
+        console.error("Ошибка при обновлении рецепта:", error);
+        res.status(500).json({ message: "Ошибка при обновлении рецепта" });
     }
 };
+
 
 // Удаление рецепта и изображения
 exports.deleteRecipe = async (req, res) => {

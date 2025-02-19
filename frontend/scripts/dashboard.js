@@ -1,107 +1,113 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const searchContainer = document.createElement("div");
-    searchContainer.classList.add("search-container");
 
-    const searchInput = document.createElement("input");
-    searchInput.setAttribute("type", "text");
-    searchInput.setAttribute("id", "searchInput");
-    searchInput.setAttribute("placeholder", "Search recipes...");
-    searchInput.classList.add("search-bar");
+        document.addEventListener("DOMContentLoaded", function () {
+            let allRecipes = [];
 
-    const searchButton = document.createElement("button");
-    searchButton.innerText = "Search";
-    searchButton.classList.add("search-button");
-    searchButton.addEventListener("click", filterRecipes);
-
-    searchContainer.appendChild(searchInput);
-    searchContainer.appendChild(searchButton);
-
-    const container = document.querySelector(".container");
-    container.insertBefore(searchContainer, container.children[1]);
-
-    document.getElementById('logout').addEventListener('click', () => {
-        localStorage.removeItem('token');
-        window.location.href = 'index.html';
-    });
-
-    let allRecipes = []; // Store all recipes globally for filtering
-
-    async function loadRecipes() {
-        try {
-            const response = await fetch('http://localhost:5000/api/recipes');
-            if (!response.ok) {
-                throw new Error('Failed to fetch recipes');
+            async function loadRecipes() {
+                try {
+                    const response = await fetch("http://localhost:5000/api/recipes");
+                    if (!response.ok) {
+                        throw new Error("Failed to fetch recipes");
+                    }
+                    allRecipes = await response.json();
+                    displayRecipes(allRecipes);
+                } catch (error) {
+                    console.error("Error fetching recipes:", error);
+                }
             }
-            allRecipes = await response.json(); // Store recipes globally
-            displayRecipes(allRecipes);
-        } catch (error) {
-            console.error(error);
-            alert(error.message);
-        }
-    }
 
-    function displayRecipes(recipes) {
-        const recipeList = document.getElementById('recipeList');
-        if (!recipeList) return;
+            function displayRecipes(recipes) {
+                const recipeContainer = document.getElementById("recipeList");
+                recipeContainer.innerHTML = "";
+                if (recipes.length === 0) {
+                    recipeContainer.innerHTML = "<p>No recipes found.</p>";
+                    return;
+                }
 
-        recipeList.innerHTML = '';
+                recipes.forEach(recipe => {
+                    const imageUrl = recipe.image ? `http://localhost:5000${recipe.image}` : "https://via.placeholder.com/300";
+                    const recipeCard = document.createElement("div");
+                    recipeCard.classList.add("recipe-card");
+                    recipeCard.innerHTML = `
+                        <img src="${imageUrl}" alt="Recipe Image">
+                        <div class="recipe-card-content">
+                            <h3>${recipe.title}</h3>
+                            <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
+                        </div>
+                        <div class="buttons">
+                            <button onclick="viewRecipe('${recipe._id}')">View More</button>
+                            <button class="delete-recipe" data-id="${recipe._id}">Delete</button>
+                        </div>
+                    `;
+                    recipeContainer.appendChild(recipeCard);
+                });
 
-        if (recipes.length === 0) {
-            recipeList.innerHTML = "<p>No recipes found.</p>";
-            return;
-        }
+                document.querySelectorAll(".delete-recipe").forEach(button => {
+                    button.addEventListener("click", async (e) => {
+                        const recipeId = e.target.getAttribute("data-id");
+                        await deleteRecipe(recipeId);
+                    });
+                });
+            }
 
-        recipes.forEach(recipe => {
-            const recipeCard = document.createElement('div');
-            recipeCard.className = 'recipe-card';
-            recipeCard.innerHTML = `
-                <img src="${recipe.image ? `http://localhost:5000${recipe.image}` : 'https://via.placeholder.com/300'}" alt="Recipe Image">
-                <div class="recipe-card-content">
-                    <h3>${recipe.title}</h3>
-                    <p><strong>Ingredients:</strong> ${Array.isArray(recipe.ingredients) ? recipe.ingredients.join(', ') : recipe.ingredients}</p>
-                </div>
-                <div class="buttons">
-                    <button class="view-recipe" data-id="${recipe._id}">View More</button>
-                    <button class="delete-recipe" data-id="${recipe._id}">Delete</button>
-                </div>
-            `;
-            recipeList.appendChild(recipeCard);
-        });
+            function filterRecipes() {
+                const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
+                if (searchValue === "") {
+                    displayRecipes(allRecipes);
+                    return;
+                }
 
-        document.querySelectorAll('.view-recipe').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const recipeId = e.target.getAttribute('data-id');
-                viewRecipe(recipeId);
+                const filteredRecipes = allRecipes.filter(recipe =>
+                    recipe.title.toLowerCase().includes(searchValue)
+                );
+
+                displayRecipes(filteredRecipes);
+            }
+
+            document.getElementById("searchButton").addEventListener("click", filterRecipes);
+            document.getElementById("searchInput").addEventListener("keypress", (event) => {
+                if (event.key === "Enter") {
+                    filterRecipes();
+                }
             });
-        });
 
-        document.querySelectorAll('.delete-recipe').forEach(button => {
-            button.addEventListener('click', async (e) => {
-                const recipeId = e.target.getAttribute('data-id');
-                await deleteRecipe(recipeId);
+            window.viewRecipe = function (id) {
+                window.location.href = `recipe.html?id=${id}`;
+            };
+
+            async function deleteRecipe(id) {
+                const confirmDelete = confirm("Are you sure you want to delete this recipe?");
+                if (!confirmDelete) return;
+
+                const token = localStorage.getItem("token");
+                if (!token) {
+                    alert("You are not authenticated!");
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
+                        method: "DELETE",
+                        headers: {
+                            "Authorization": `Bearer ${token}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        alert("Recipe deleted successfully!");
+                        loadRecipes();
+                    } else {
+                        alert("Failed to delete recipe.");
+                    }
+                } catch (error) {
+                    console.error("Error deleting recipe:", error);
+                    alert("An error occurred while deleting the recipe.");
+                }
+            }
+
+            document.getElementById("logout").addEventListener("click", () => {
+                localStorage.removeItem("token");
+                window.location.href = "index.html";
             });
+
+            loadRecipes();
         });
-    }
-
-    function filterRecipes() {
-        const searchValue = searchInput.value.toLowerCase().trim(); // Get search value and remove spaces
-        if (searchValue === "") {
-            displayRecipes(allRecipes); // Show all recipes if search is empty
-            return;
-        }
-
-        const filteredRecipes = allRecipes.filter(recipe =>
-            recipe.title.toLowerCase().includes(searchValue) // Search only in title
-        );
-
-        displayRecipes(filteredRecipes);
-    }
-
-    searchInput.addEventListener("keypress", (event) => {
-        if (event.key === "Enter") {
-            filterRecipes();
-        }
-    });
-
-    loadRecipes();
-});

@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { createRecipe, getRecipes, getRecipeById, deleteRecipe } = require('../controllers/recipeController');
+const { createRecipe, getRecipes, getRecipeById, updateRecipe, deleteRecipe } = require('../controllers/recipeController');
 const authMiddleware = require('../middleware/authMiddleware');
 const multer = require('multer');
 
@@ -19,6 +19,7 @@ const upload = multer({ storage });
 router.post('/', authMiddleware, upload.single('image'), createRecipe);
 router.get('/', getRecipes);
 router.get('/:id', getRecipeById);
+router.put("/:id", authMiddleware, upload.single("image"), updateRecipe);
 
 // Исправленный маршрут для удаления рецепта
 router.delete('/:id', authMiddleware, deleteRecipe);
