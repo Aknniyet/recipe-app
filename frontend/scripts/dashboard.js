@@ -21,10 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const recipeCard = document.createElement('div');
                 recipeCard.className = 'recipe-card';
                 recipeCard.innerHTML = `
-                    <img src="${recipe.image || 'https://via.placeholder.com/300'}" alt="Recipe Image">
+                    <img src="${recipe.image ? `http://localhost:5000${recipe.image}` : 'https://via.placeholder.com/300'}" alt="Recipe Image">
                     <div class="recipe-card-content">
                         <h3>${recipe.title}</h3>
-                        <p><strong>Ingredients:</strong> ${recipe.ingredients}</p>
+                        <p><strong>Ingredients:</strong> ${recipe.ingredients.join(', ')}</p>
                     </div>
                     <div class="buttons">
                         <button class="view-recipe" data-id="${recipe._id}">View More</button>
@@ -85,17 +85,24 @@ async function deleteRecipe(id) {
         alert('You are not authenticated!');
         return;
     }
-    const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    });
 
-    if (response.ok) {
-        alert('Recipe deleted successfully!');
-        location.reload(); // Перезагружаем страницу после удаления
-    } else {
-        alert('Failed to delete recipe.');
+    try {
+        const response = await fetch(`http://localhost:5000/api/recipes/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (response.ok) {
+            alert('Recipe deleted successfully!');
+            location.reload();
+        } else {
+            alert('Failed to delete recipe.');
+        }
+    } catch (error) {
+        console.error('Error deleting recipe:', error);
+        alert('An error occurred while deleting the recipe.');
     }
 }
+

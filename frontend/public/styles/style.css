@@ -48,10 +48,12 @@ body {
 }
 
 
-.container {
+.container-ds {
     flex-grow: 1;
     margin-left: 270px; /* Отступ, чтобы контент не перекрывался navbar */
     padding: 20px;
+    align-items: center; 
+    justify-content: center;
 }
 
 
@@ -127,6 +129,65 @@ p {
     color: #ff6600;
     font-size: 20px;
 }
+
+/* Делаем .container flex-контейнером для центрирования */
+.container {
+    flex-grow: 1;
+    margin-left: 270px; /* Отступ от sidebar */
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Высота контейнера на весь экран */
+}
+
+/* Центрирование карточки рецепта */
+.recipe-card-detail {
+    max-width: 700px;
+    width: 100%;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрируем содержимое */
+    justify-content: center; /* Центрируем по вертикали */
+}
+
+/* Центрирование изображения */
+.recipe-card-detail img {
+    width: 100%;
+    max-width: 600px;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto; /* Делаем картинку по центру */
+}
+
+/* Стили для текста */
+.recipe-content h1 {
+    color: #ff6600;
+    font-size: 26px;
+    font-weight: bold;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.recipe-content p {
+    font-size: 16px;
+    color: #000;
+    text-align: center;
+    margin: 8px 0;
+}
+
+.recipe-content strong {
+    color: #ff6600;
+    font-weight: bold;
+}
+
 
 .buttons {
     margin-top: 10px;

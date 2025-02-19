@@ -29,17 +29,18 @@
             }
 
             fetch(`http://localhost:5000/api/recipes/${recipeId}`)
-                .then(response => response.json())
-                .then(recipe => {
-                    document.getElementById("recipeDetails").innerHTML = `
-                        <div class="recipe-content">
-                            <img src="${recipe.image || 'https://via.placeholder.com/500'}" alt="Recipe Image">
-                            <h1>${recipe.title}</h1>
-                            <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
-                            <p><strong>Instructions:</strong> ${recipe.instructions}</p>
-                        </div>
-                    `;
-                })
+    .then(response => response.json())
+    .then(recipe => {
+        document.getElementById("recipeDetails").innerHTML = `
+            <div class="recipe-content">
+                <img src="http://localhost:5000${recipe.image}" alt="Recipe Image">
+                <h1>${recipe.title}</h1>
+                <p><strong>Ingredients:</strong> ${recipe.ingredients.join(', ')}</p>
+                <p><strong>Instructions:</strong> ${recipe.instructions}</p>
+            </div>
+        `;
+    })
+
                 .catch(error => {
                     console.error("Error loading recipe:", error);
                     document.getElementById("recipeDetails").innerHTML = "<p>Error loading recipe.</p>";
