@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
 const { createRecipe, getRecipes, getRecipeById, updateRecipe, deleteRecipe } = require('../controllers/recipeController');
-const authMiddleware = require('../middleware/authMiddleware');
+const { authMiddleware, adminMiddleware } = require('../middleware/authMiddleware'); // Убеждаемся, что adminMiddleware импортирован
 const multer = require('multer');
 
 const router = express.Router();
@@ -16,12 +16,11 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/', authMiddleware, upload.single('image'), createRecipe);
+// Роуты
+router.post('/', authMiddleware, adminMiddleware, upload.single('image'), createRecipe); // Теперь только админ может создать рецепт
 router.get('/', getRecipes);
 router.get('/:id', getRecipeById);
-router.put("/:id", authMiddleware, upload.single("image"), updateRecipe);
-
-// Исправленный маршрут для удаления рецепта
-router.delete('/:id', authMiddleware, deleteRecipe);
+router.put("/:id", authMiddleware, adminMiddleware, upload.single("image"), updateRecipe); // Теперь только админ может редактировать
+router.delete("/:id", authMiddleware, adminMiddleware, deleteRecipe); // Удаление доступно только админу
 
 module.exports = router;

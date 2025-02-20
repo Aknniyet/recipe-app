@@ -1,9 +1,11 @@
-const express = require('express');
-const { register, login } = require('../controllers/authController');
+const express = require("express");
+const { register, login, getUserProfile } = require("../controllers/authController");
+const { authMiddleware } = require("../middleware/authMiddleware");
+
 const router = express.Router();
 
-router.post('/register', register);
-router.post('/login', login);
+router.post("/register", register);
+router.post("/login", login);
+router.get("/me", authMiddleware, getUserProfile); // ✅ Теперь маршрут работает!
 
 module.exports = router;
-

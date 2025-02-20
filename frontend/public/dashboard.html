@@ -24,8 +24,17 @@
 
         <div class="recipe-grid" id="recipeList"></div>
     </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+    const role = localStorage.getItem("role");
 
-
+    // Убираем "Add Recipe" для обычных пользователей
+    if (role !== "admin") {
+        document.getElementById("addRecipeNav").style.display = "none";
+    }
+});
+        </script>        
     <script src="../scripts/dashboard.js"></script>
 </body>
 </html>

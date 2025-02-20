@@ -16,61 +16,35 @@
 
     <div class="container">
         <div class="recipe-card-detail" id="recipeDetails"></div>
-        <button id="editButton" style="display: none;">Edit</button>
     </div>
     
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const urlParams = new URLSearchParams(window.location.search);
-            const recipeId = urlParams.get("id");
-    
-            if (!recipeId) {
-                document.getElementById("recipeDetails").innerHTML = "<p>Error: Recipe not found.</p>";
-                return;
-            }
-    
-            fetch(`http://localhost:5000/api/recipes/${recipeId}`)
-                .then(response => response.json())
-                .then(recipe => {
-                    console.log("Loaded Recipe:", recipe); // Лог для отладки
-                    document.getElementById("recipeDetails").innerHTML = `
-                        <div class="recipe-content">
-                            <img src="http://localhost:5000${recipe.image}" alt="Recipe Image">
-                            <h1>${recipe.title}</h1>
-                            <p><strong>Ingredients:</strong> ${recipe.ingredients.join(', ')}</p>
-                            <p><strong>Instructions:</strong> ${recipe.instructions}</p>
-                        </div>
-                    `;
-    
-                    // Получаем user ID из токена
-                    const token = localStorage.getItem("token");
-                    const userId = token ? getUserIdFromToken(token) : null;
-    
-                    console.log("User ID:", userId); // Лог для отладки
-    
-                    // Проверяем, является ли текущий пользователь владельцем рецепта
-                    if (userId && recipe.createdBy && (recipe.createdBy._id === userId || recipe.createdBy === userId)) {
-                        const editButton = document.getElementById("editButton");
-                        editButton.style.display = "block";
-                        editButton.addEventListener("click", function () {
-                            window.location.href = `edit-recipe.html?id=${recipeId}`;
-                        });
-                    }
-                })
-                .catch(error => {
-                    console.error("Error loading recipe:", error);
-                    document.getElementById("recipeDetails").innerHTML = "<p>Error loading recipe.</p>";
-                });
-    
-            function getUserIdFromToken(token) {
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return payload.id;
-                } catch (e) {
-                    return null;
-                }
-            }
+    const urlParams = new URLSearchParams(window.location.search);
+    const recipeId = urlParams.get("id");
+
+    if (!recipeId) {
+        document.getElementById("recipeDetails").innerHTML = "<p>Error: Recipe not found.</p>";
+        return;
+    }
+
+    fetch(`http://localhost:5000/api/recipes/${recipeId}`)
+        .then(response => response.json())
+        .then(recipe => {
+            document.getElementById("recipeDetails").innerHTML = `
+                <div class="recipe-content">
+                    <img src="http://localhost:5000${recipe.image}" alt="Recipe Image">
+                    <h1>${recipe.title}</h1>
+                    <p><strong>Ingredients:</strong> ${recipe.ingredients.join(', ')}</p>
+                    <p><strong>Instructions:</strong> ${recipe.instructions}</p>
+                </div>
+            `;
+        })
+        .catch(error => {
+            console.error("Error loading recipe:", error);
+            document.getElementById("recipeDetails").innerHTML = "<p>Error loading recipe.</p>";
         });
+});
     
         // Логаут
         document.getElementById("logout").addEventListener("click", () => {

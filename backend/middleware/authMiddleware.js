@@ -13,5 +13,12 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-module.exports = authMiddleware;
+// Проверка, является ли пользователь админом
+const adminMiddleware = (req, res, next) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Доступ запрещен. Вы не администратор.' });
+    }
+    next();
+};
 
+module.exports = { authMiddleware, adminMiddleware };

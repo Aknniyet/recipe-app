@@ -94,25 +94,19 @@ exports.updateRecipe = async (req, res) => {
 // Удаление рецепта и изображения
 exports.deleteRecipe = async (req, res) => {
     try {
-        const recipeId = req.params.id;
-
-        // Находим рецепт
-        const recipe = await Recipe.findById(recipeId);
+        const recipe = await Recipe.findById(req.params.id);
         if (!recipe) {
             return res.status(404).json({ message: 'Рецепт не найден' });
         }
 
-        // Проверяем авторизацию пользователя
+        // Проверка на авторизацию
         if (!req.user || !req.user.id) {
-            console.error('Ошибка авторизации: req.user отсутствует.');
             return res.status(403).json({ message: 'Ошибка авторизации: Нет доступа' });
         }
 
-        console.log(`Пользователь: ${req.user.id}, Владелец рецепта: ${recipe.createdBy.toString()}`);
-
-        // Сравниваем ID пользователя и владельца рецепта
-        if (recipe.createdBy.toString() !== req.user.id) {
-            return res.status(403).json({ message: 'Нет доступа' });
+        // Проверяем, является ли пользователь владельцем или админом
+        if (recipe.createdBy.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Доступ запрещён' });
         }
 
         // Удаляем изображение, если оно есть
@@ -123,8 +117,7 @@ exports.deleteRecipe = async (req, res) => {
             }
         }
 
-        // Удаляем сам рецепт
-        await Recipe.deleteOne({ _id: recipeId });
+        await Recipe.deleteOne({ _id: req.params.id });
 
         return res.json({ message: 'Рецепт успешно удален' });
     } catch (error) {
