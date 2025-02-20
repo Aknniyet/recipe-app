@@ -19,17 +19,28 @@ exports.upload = upload.single('image'); // Middleware для загрузки �
 exports.createRecipe = async (req, res) => {
     try {
         const { title, ingredients, instructions, category } = req.body;
+        
         if (!title || !ingredients || !instructions || !category) {
             return res.status(400).json({ message: "Все поля обязательны" });
+        }
+
+        const allowedCategories = ["Breakfast", "Lunch", "Dinner", "Dessert", "Drinks"]; // Разрешенные категории
+        if (!allowedCategories.includes(category.trim())) {
+            return res.status(400).json({ message: "Недопустимая категория" });
+        }
+
+        const existingRecipe = await Recipe.findOne({ title: title.trim() });
+        if (existingRecipe) {
+            return res.status(400).json({ message: "Рецепт с таким названием уже существует" });
         }
 
         const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
 
         const newRecipe = new Recipe({
-            title,
-            ingredients: ingredients.split(','),
-            instructions,
-            category, // Добавлена категория
+            title: title.trim(),
+            ingredients: ingredients.split(',').map(i => i.trim()), // Убираем пробелы у ингредиентов
+            instructions: instructions.trim(),
+            category: category.trim(),
             image: imagePath,
             createdBy: req.user.id
         });
@@ -42,24 +53,28 @@ exports.createRecipe = async (req, res) => {
     }
 };
 
+
 // 📌 **Получение всех рецептов с фильтрацией по категории**
 exports.getRecipes = async (req, res) => {
     try {
+        const { category, search, page = 1, limit = 10 } = req.query;
         const filter = {};
-        if (req.query.category) {
-            filter.category = req.query.category;
-        }
+
+        if (category) filter.category = category;
+        if (search) filter.title = { $regex: search, $options: "i" }; // Поиск по названию (регистронезависимый)
 
         const recipes = await Recipe.find(filter)
             .populate('createdBy', 'username')
-            .sort({ createdAt: -1 }) // Сортировка по дате (новые вверху)
-            .limit(50) // Ограничение на 50 рецептов
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit) // Пропуск страниц
+            .limit(parseInt(limit));
 
         res.json(recipes);
     } catch (error) {
         res.status(500).json({ message: "Ошибка при получении рецептов" });
     }
 };
+
 
 // 📌 **Оптимизированное получение одного рецепта по ID**
 exports.getRecipeById = async (req, res) => {
@@ -85,12 +100,23 @@ exports.updateRecipe = async (req, res) => {
             return res.status(403).json({ message: "Доступ запрещен" });
         }
 
-        recipe.title = req.body.title || recipe.title;
-        recipe.ingredients = req.body.ingredients ? req.body.ingredients.split(",") : recipe.ingredients;
-        recipe.instructions = req.body.instructions || recipe.instructions;
-        recipe.category = req.body.category || recipe.category;
+        if (req.body.title) {
+            const existingRecipe = await Recipe.findOne({ title: req.body.title.trim() });
+            if (existingRecipe && existingRecipe._id.toString() !== recipe._id.toString()) {
+                return res.status(400).json({ message: "Рецепт с таким названием уже существует" });
+            }
+            recipe.title = req.body.title.trim();
+        }
+
+        if (req.body.ingredients) recipe.ingredients = req.body.ingredients.split(",").map(i => i.trim());
+        if (req.body.instructions) recipe.instructions = req.body.instructions.trim();
+        if (req.body.category) recipe.category = req.body.category.trim();
 
         if (req.file) {
+            if (recipe.image) {
+                const oldImagePath = path.join(__dirname, "..", recipe.image);
+                if (fs.existsSync(oldImagePath)) fs.unlinkSync(oldImagePath);
+            }
             recipe.image = `/uploads/${req.file.filename}`;
         }
 
@@ -100,6 +126,7 @@ exports.updateRecipe = async (req, res) => {
         res.status(500).json({ message: "Ошибка при обновлении рецепта" });
     }
 };
+
 
 // 📌 **Удаление рецепта**
 exports.deleteRecipe = async (req, res) => {
@@ -128,7 +155,7 @@ exports.deleteRecipe = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
     try {
-        const categories = await Recipe.distinct("category"); // Получаем список уникальных категорий
+        const categories = await Recipe.distinct("category", { category: { $ne: "" } }); // Убираем пустые значения
         res.json(categories);
     } catch (error) {
         res.status(500).json({ message: "Ошибка при получении категорий" });
@@ -136,17 +163,24 @@ exports.getCategories = async (req, res) => {
 };
 
 
-
 // 📌 **Агрегация - количество рецептов по категориям**
 exports.getRecipeStatistics = async (req, res) => {
     try {
+        const { days } = req.query;
+        const filterDate = new Date();
+        filterDate.setDate(filterDate.getDate() - (days ? parseInt(days) : 30));
+
         const stats = await Recipe.aggregate([
+            { $match: { category: { $ne: "" }, createdAt: { $gte: filterDate } } },
             { $group: { _id: "$category", count: { $sum: 1 } } },
-            { $sort: { count: -1 } } // Сортировка по количеству
+            { $sort: { count: -1 } }
         ]);
 
-        res.json(stats);
+        const totalRecipes = await Recipe.countDocuments(); // Общее количество рецептов
+
+        res.json({ totalRecipes, stats });
     } catch (error) {
         res.status(500).json({ message: "Ошибка при получении статистики" });
     }
 };
+
