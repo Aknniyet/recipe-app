@@ -23,4 +23,20 @@ router.get('/:id', getRecipeById);
 router.put("/:id", authMiddleware, adminMiddleware, upload.single("image"), updateRecipe); // Теперь только админ может редактировать
 router.delete("/:id", authMiddleware, adminMiddleware, deleteRecipe); // Удаление доступно только админу
 
+router.get("/", async (req, res) => {
+    try {
+        const filter = {};
+        if (req.query.category) {
+            filter.category = req.query.category;
+        }
+
+        const recipes = await Recipe.find(filter);
+        res.json(recipes);
+    } catch (error) {
+        res.status(500).json({ message: "Ошибка получения рецептов" });
+    }
+});
+
+
+
 module.exports = router;

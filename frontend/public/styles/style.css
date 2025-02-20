@@ -86,10 +86,13 @@ body {
 
 .container-ds {
     flex-grow: 1;
-    margin-left: 270px; /* Отступ, чтобы контент не перекрывался navbar */
+    margin-left: 270px; /* Отступ для сайдбара */
     padding: 20px;
-    align-items: center; 
-    justify-content: center;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: hidden; /* Отключает горизонтальную прокрутку */
 }
 
 
@@ -137,10 +140,16 @@ p {
 
 .recipe-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 3 рецепта в ряд */
     gap: 20px;
     margin-top: 20px;
+    width: 100%;
+    max-width: 1200px; /* Ограничение ширины для центрирования */
+    margin-left: auto;
+    margin-right: auto;
 }
+
+
 
 .recipe-card {
     background: #fff;
@@ -148,11 +157,12 @@ p {
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
-    margin: 10px;
-    width: 300px;
-    display: inline-block;
+    width: 100%;
+    max-width: 320px; /* Максимальная ширина */
     text-align: center;
 }
+
+
 
 .recipe-card img {
     width: 100%;
@@ -326,3 +336,4 @@ p {
 #backButton:hover {
     background-color: #e65c00;
 }
+

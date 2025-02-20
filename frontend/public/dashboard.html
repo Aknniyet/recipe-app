@@ -9,32 +9,30 @@
 <body>
     <div class="sidebar">
         <a href="dashboard.html" class="active">Home</a>
-        <a href="add-recipe.html">Add Recipe</a>
+        <a href="add-recipe.html" id="addRecipeNav">Add Recipe</a>
         <a href="#" id="logout">Logout</a>
     </div>
 
     <div class="container-ds">
         <h2>Recipe Dashboard</h2>
 
-        <!-- Search Input & Button Container -->
+        <!-- Search and Category Filter -->
         <div class="search-container">
             <input type="text" id="searchInput" placeholder="Search recipes..." class="search-bar">
+            <select id="categoryFilter" class="search-bar">
+                <option value="">All Categories</option>
+                <option value="Breakfast">Breakfast</option>
+                <option value="Lunch">Lunch</option>
+                <option value="Dinner">Dinner</option>
+                <option value="Dessert">Dessert</option>
+                <option value="Drinks">Drinks</option>
+            </select>
             <button id="searchButton" class="search-button">Search</button>
         </div>
 
         <div class="recipe-grid" id="recipeList"></div>
     </div>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-    const role = localStorage.getItem("role");
 
-    // Убираем "Add Recipe" для обычных пользователей
-    if (role !== "admin") {
-        document.getElementById("addRecipeNav").style.display = "none";
-    }
-});
-        </script>        
-    <script src="../scripts/dashboard.js"></script>
+    <script src="../scripts/dashboard.js" defer></script>
 </body>
 </html>

@@ -1,15 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
     let allRecipes = [];
-    const role = localStorage.getItem("role"); // Получаем роль
+    const role = localStorage.getItem("role");
 
     async function loadRecipes() {
         try {
             const response = await fetch("http://localhost:5000/api/recipes");
-            if (!response.ok) {
-                throw new Error("Failed to fetch recipes");
-            }
+            if (!response.ok) throw new Error("Failed to fetch recipes");
+
             allRecipes = await response.json();
             displayRecipes(allRecipes);
+            populateCategories(allRecipes);
         } catch (error) {
             console.error("Error fetching recipes:", error);
         }
@@ -31,6 +31,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 <img src="${imageUrl}" alt="Recipe Image">
                 <div class="recipe-card-content">
                     <h3>${recipe.title}</h3>
+                    <p><strong>Category:</strong> ${recipe.category || "No Category"}</p>
                     <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
                 </div>
                 <div class="buttons">
@@ -47,10 +48,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function filterRecipes() {
         const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
-        const filteredRecipes = allRecipes.filter(recipe =>
+        const selectedCategory = document.getElementById("categoryFilter").value;
+
+        let filteredRecipes = allRecipes.filter(recipe =>
             recipe.title.toLowerCase().includes(searchValue)
         );
+
+        if (selectedCategory !== "All Categories") {
+            filteredRecipes = filteredRecipes.filter(recipe => recipe.category === selectedCategory);
+        }
+
         displayRecipes(filteredRecipes);
+    }
+
+    function populateCategories(recipes) {
+        const categoryFilter = document.getElementById("categoryFilter");
+        const categories = ["All Categories", ...new Set(recipes.map(recipe => recipe.category).filter(Boolean))];
+
+        categoryFilter.innerHTML = categories.map(category => `<option value="${category}">${category}</option>`).join("");
     }
 
     document.getElementById("searchButton").addEventListener("click", filterRecipes);
@@ -59,6 +74,8 @@ document.addEventListener("DOMContentLoaded", function () {
             filterRecipes();
         }
     });
+
+    document.getElementById("categoryFilter").addEventListener("change", filterRecipes);
 
     window.viewRecipe = function (id) {
         window.location.href = `recipe.html?id=${id}`;
@@ -81,7 +98,6 @@ document.addEventListener("DOMContentLoaded", function () {
         loadRecipes();
     };
 
-    // Кнопка Logout
     document.getElementById("logout").addEventListener("click", () => {
         localStorage.removeItem("token");
         localStorage.removeItem("role");
