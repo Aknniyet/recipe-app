@@ -299,3 +299,30 @@ p {
 #editButton:hover {
     background-color: #e65c00;
 }
+
+/* Контейнер кнопки "Back" */
+.button-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px; /* Достаточный отступ, чтобы не прилипала */
+}
+
+/* Стиль кнопки "Back" */
+#backButton {
+    background-color: #ff6600;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 200px;
+    text-align: center;
+    display: block;
+    margin-top: 20px; /* Отодвигаем кнопку вниз */
+}
+
+#backButton:hover {
+    background-color: #e65c00;
+}
