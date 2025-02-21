@@ -20,8 +20,6 @@ router.get("/", getRecipes);
 router.get("/:id", getRecipeById);
 router.put("/:id", authMiddleware, adminMiddleware, upload.single("image"), updateRecipe);
 router.delete("/:id", authMiddleware, adminMiddleware, deleteRecipe);
-
-// **Роуты для лайков и избранного**
 router.post("/favorite", authMiddleware, toggleFavorite);
 router.post("/like", authMiddleware, toggleLike);
 

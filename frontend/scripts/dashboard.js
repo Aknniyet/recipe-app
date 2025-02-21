@@ -60,7 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     <button onclick="deleteRecipe('${recipe._id}')">Delete</button>
                 `;
             } else {
-                const isFavorite = favoriteRecipes.includes(recipe._id);
+                const isFavorite = favoriteRecipes.some(fav => fav._id === recipe._id);
                 buttons += `
                     <button onclick="toggleFavorite('${recipe._id}', event)">${isFavorite ? "⭐ Unfavorite" : "⭐ Favorite"}</button>
                     <button onclick="toggleLike('${recipe._id}', event)" id="like-btn-${recipe._id}">❤️ Like (${recipe.likes ? recipe.likes.length : 0})</button>
@@ -90,11 +90,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         favoriteRecipes.forEach(recipe => {
+            const imageUrl = recipe.image ? `http://localhost:5000${recipe.image}` : "https://via.placeholder.com/300";
             const recipeCard = document.createElement("div");
             recipeCard.classList.add("recipe-card");
 
             recipeCard.innerHTML = `
-                <img src="https://via.placeholder.com/300" alt="Recipe Image">
+                <img src="${imageUrl}" alt="Recipe Image">
                 <div class="recipe-card-content">
                     <h3>${recipe.title}</h3>
                     <p><strong>Category:</strong> ${recipe.category || "No Category"}</p>
@@ -108,7 +109,6 @@ document.addEventListener("DOMContentLoaded", function () {
             recipeContainer.appendChild(recipeCard);
         });
     }
-
 
     function filterRecipes() {
         const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
@@ -168,10 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Toggling favorite for recipe:", recipeId);
 
             const token = localStorage.getItem("token");
-            if (!token) {
-                console.error("No token found. User must log in.");
-                return;
-            }
+            if (!token) return;
 
             const response = await fetch("http://localhost:5000/api/users/favorites", {
                 method: "POST",
@@ -219,11 +216,14 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    document.getElementById("showFavorites").addEventListener("click", showFavorites);
+    if (role !== "admin") {
+        document.getElementById("showFavorites").addEventListener("click", showFavorites);
+    } else {
+        document.getElementById("showFavorites").style.display = "none"; // Скрыть кнопку для админа
+    }
 
     window.toggleFavorite = toggleFavorite;
     window.toggleLike = toggleLike;
-
 
     document.getElementById("logout").addEventListener("click", () => {
         localStorage.removeItem("token");

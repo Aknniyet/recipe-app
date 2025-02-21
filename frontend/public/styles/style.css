@@ -185,6 +185,43 @@ p {
     justify-content: center;
     align-items: center;
     min-height: 100vh; /* Высота контейнера на весь экран */
+    flex-direction: column; /* Располагаем элементы в колонку */
+}
+
+/* Центрирование карточки рецепта */
+.recipe-card-detail {
+    max-width: 700px;
+    width: 100%;
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрируем содержимое */
+    justify-content: center; /* Центрируем по вертикали */
+}
+
+/* Центрирование изображения */
+.recipe-card-detail img {
+    width: 100%;
+    max-width: 600px;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+    margin: 0 auto; /* Делаем картинку по центру */
+}/* Делаем .container flex-контейнером для центрирования */
+.container {
+    flex-grow: 1;
+    margin-left: 270px; /* Отступ от sidebar */
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* Высота контейнера на весь экран */
+    flex-direction: column; /* Располагаем элементы в колонку */
 }
 
 /* Центрирование карточки рецепта */
@@ -310,15 +347,13 @@ p {
     background-color: #e65c00;
 }
 
-/* Контейнер кнопки "Back" */
 .button-container {
-    display: flex;
-    justify-content: center;
     width: 100%;
-    margin-top: 20px; /* Достаточный отступ, чтобы не прилипала */
+    display: flex;
+    justify-content: center; 
+    margin-top: 20px;
 }
 
-/* Стиль кнопки "Back" */
 #backButton {
     background-color: #ff6600;
     color: white;
@@ -329,8 +364,6 @@ p {
     font-size: 16px;
     width: 200px;
     text-align: center;
-    display: block;
-    margin-top: 20px; /* Отодвигаем кнопку вниз */
 }
 
 #backButton:hover {

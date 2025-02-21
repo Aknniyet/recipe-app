@@ -5,26 +5,23 @@ const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
-const userRoutes = require('./routes/userRoutes'); // ✅ Добавлен импорт
-
+const userRoutes = require('./routes/userRoutes'); 
 dotenv.config({ path: './backend/.env' });
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Подключение к базе данных
 connectDB();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
-// Даем доступ к файлам изображений
+// Serve uploaded image files
 app.use('/uploads', express.static('uploads'));
 
-// Маршруты
+// API routes
 app.use('/api/auth', authRoutes);
 app.use('/api/recipes', recipeRoutes);
-app.use('/api/users', userRoutes); // ✅ Добавлен маршрут
+app.use('/api/users', userRoutes); 
 
-// Запуск сервера
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
