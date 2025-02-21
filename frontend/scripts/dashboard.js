@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
     let allRecipes = [];
+    let favoriteRecipes = [];
     const role = localStorage.getItem("role");
 
     async function loadRecipes() {
@@ -10,8 +11,29 @@ document.addEventListener("DOMContentLoaded", function () {
             allRecipes = await response.json();
             displayRecipes(allRecipes);
             populateCategories(allRecipes);
+            loadFavorites();
         } catch (error) {
             console.error("Error fetching recipes:", error);
+        }
+    }
+
+    async function loadFavorites() {
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const response = await fetch("http://localhost:5000/api/users/favorites", {
+                method: "GET",
+                headers: {
+                    "Authorization": "Bearer " + token
+                }
+            });
+
+            if (!response.ok) throw new Error("Failed to load favorites");
+
+            favoriteRecipes = await response.json();
+        } catch (error) {
+            console.error("Error loading favorites:", error);
         }
     }
 
@@ -27,6 +49,24 @@ document.addEventListener("DOMContentLoaded", function () {
             const imageUrl = recipe.image ? `http://localhost:5000${recipe.image}` : "https://via.placeholder.com/300";
             const recipeCard = document.createElement("div");
             recipeCard.classList.add("recipe-card");
+
+            let buttons = `
+                <button onclick="viewRecipe('${recipe._id}')">View More</button>
+            `;
+
+            if (role === "admin") {
+                buttons += `
+                    <button onclick="editRecipe('${recipe._id}')">Edit</button>
+                    <button onclick="deleteRecipe('${recipe._id}')">Delete</button>
+                `;
+            } else {
+                const isFavorite = favoriteRecipes.includes(recipe._id);
+                buttons += `
+                    <button onclick="toggleFavorite('${recipe._id}', event)">${isFavorite ? "⭐ Unfavorite" : "⭐ Favorite"}</button>
+                    <button onclick="toggleLike('${recipe._id}', event)" id="like-btn-${recipe._id}">❤️ Like (${recipe.likes ? recipe.likes.length : 0})</button>
+                `;
+            }
+
             recipeCard.innerHTML = `
                 <img src="${imageUrl}" alt="Recipe Image">
                 <div class="recipe-card-content">
@@ -34,17 +74,41 @@ document.addEventListener("DOMContentLoaded", function () {
                     <p><strong>Category:</strong> ${recipe.category || "No Category"}</p>
                     <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
                 </div>
+                <div class="buttons">${buttons}</div>
+            `;
+            recipeContainer.appendChild(recipeCard);
+        });
+    }
+
+    function showFavorites() {
+        const recipeContainer = document.getElementById("recipeList");
+        recipeContainer.innerHTML = "";
+
+        if (favoriteRecipes.length === 0) {
+            recipeContainer.innerHTML = "<p>No favorite recipes.</p>";
+            return;
+        }
+
+        favoriteRecipes.forEach(recipe => {
+            const recipeCard = document.createElement("div");
+            recipeCard.classList.add("recipe-card");
+
+            recipeCard.innerHTML = `
+                <img src="https://via.placeholder.com/300" alt="Recipe Image">
+                <div class="recipe-card-content">
+                    <h3>${recipe.title}</h3>
+                    <p><strong>Category:</strong> ${recipe.category || "No Category"}</p>
+                    <p><strong>Ingredients:</strong> ${recipe.ingredients.join(", ")}</p>
+                </div>
                 <div class="buttons">
                     <button onclick="viewRecipe('${recipe._id}')">View More</button>
-                    ${role === "admin" ? `
-                        <button onclick="editRecipe('${recipe._id}')">Edit</button>
-                        <button onclick="deleteRecipe('${recipe._id}')">Delete</button>
-                    ` : ""}
+                    <button onclick="toggleFavorite('${recipe._id}', event)">⭐ Unfavorite</button>
                 </div>
             `;
             recipeContainer.appendChild(recipeCard);
         });
     }
+
 
     function filterRecipes() {
         const searchValue = document.getElementById("searchInput").value.toLowerCase().trim();
@@ -97,6 +161,69 @@ document.addEventListener("DOMContentLoaded", function () {
         alert("Recipe deleted!");
         loadRecipes();
     };
+
+    async function toggleFavorite(recipeId, event) {
+        if (event) event.preventDefault();
+        try {
+            console.log("Toggling favorite for recipe:", recipeId);
+
+            const token = localStorage.getItem("token");
+            if (!token) {
+                console.error("No token found. User must log in.");
+                return;
+            }
+
+            const response = await fetch("http://localhost:5000/api/users/favorites", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ recipeId })
+            });
+
+            if (!response.ok) throw new Error("Failed to update favorites");
+
+            loadRecipes();
+        } catch (error) {
+            console.error("Error updating favorites:", error);
+        }
+    }
+
+    async function toggleLike(recipeId, event) {
+        if (event) event.preventDefault();
+        try {
+            console.log("Toggling like for recipe:", recipeId);
+
+            const token = localStorage.getItem("token");
+            if (!token) return;
+
+            const response = await fetch("http://localhost:5000/api/users/likes", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({ recipeId })
+            });
+
+            if (!response.ok) throw new Error("Failed to update likes");
+
+            const data = await response.json();
+            const likeButton = document.getElementById(`like-btn-${recipeId}`);
+            if (likeButton) {
+                likeButton.innerHTML = `❤️ Like (${data.likes.length})`;
+            }
+        } catch (error) {
+            console.error("Error updating likes:", error);
+        }
+    }
+
+    document.getElementById("showFavorites").addEventListener("click", showFavorites);
+
+    window.toggleFavorite = toggleFavorite;
+    window.toggleLike = toggleLike;
+
 
     document.getElementById("logout").addEventListener("click", () => {
         localStorage.removeItem("token");

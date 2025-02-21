@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
 const recipeRoutes = require('./routes/recipeRoutes');
+const userRoutes = require('./routes/userRoutes'); // ✅ Добавлен импорт
 
 dotenv.config({ path: './backend/.env' });
 const app = express();
@@ -23,6 +24,7 @@ app.use('/uploads', express.static('uploads'));
 // Маршруты
 app.use('/api/auth', authRoutes);
 app.use('/api/recipes', recipeRoutes);
+app.use('/api/users', userRoutes); // ✅ Добавлен маршрут
 
 // Запуск сервера
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
