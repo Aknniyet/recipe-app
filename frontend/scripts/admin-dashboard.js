@@ -11,9 +11,11 @@ document.addEventListener("DOMContentLoaded", async function () {
             headers: { "Authorization": `Bearer ${token}` }
         });
 
+        // Convert response data to JSON format
         const recipes = await response.json();
         const recipeList = document.getElementById("recipeList");
 
+        // Iterate over each recipe and dynamically create table rows
         recipes.forEach(recipe => {
             const row = document.createElement("tr");
             row.innerHTML = `

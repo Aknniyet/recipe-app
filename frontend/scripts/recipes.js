@@ -1,53 +1,57 @@
 document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("recipeForm"); // Обновленный ID формы
+    const form = document.getElementById("recipeForm"); 
 
     if (!form) {
-        console.error("Форма recipeForm не найдена!");
+        console.error("Form 'recipeForm' not found!");
         return;
     }
 
     form.addEventListener("submit", async function (event) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent page reload on form submission
 
         const formData = new FormData();
         formData.append("title", document.getElementById("title").value.trim());
         formData.append("ingredients", document.getElementById("ingredients").value.trim());
         formData.append("instructions", document.getElementById("instructions").value.trim());
 
-        // Проверка, есть ли категория
+        // Check if category exists
         const categoryElement = document.getElementById("category");
         const category = categoryElement ? categoryElement.value.trim() : "No Category";
         formData.append("category", category);
 
-        // Проверка, есть ли изображение
+        // Check if an image is uploaded
         const imageFile = document.getElementById("image").files[0];
         if (imageFile) {
             formData.append("image", imageFile);
         }
 
+        // Retrieve authentication token
         const token = localStorage.getItem("token");
         if (!token) {
-            alert("Вы не авторизованы");
+            alert("You are not authorized");
             return;
         }
 
         try {
+            // Send recipe data to the server
             const response = await fetch("http://localhost:5000/api/recipes", {
                 method: "POST",
-                headers: { "Authorization": `Bearer ${token}` },
-                body: formData
+                headers: { "Authorization": `Bearer ${token}` }, // Include authorization token
+                body: formData 
             });
 
             const result = await response.json();
+            
+        
             if (response.ok) {
-                alert("Рецепт успешно добавлен!");
+                alert("Recipe added successfully!");
                 window.location.href = "dashboard.html";
             } else {
-                alert("Ошибка при добавлении рецепта: " + (result.message || "Неизвестная ошибка"));
+                alert("Error adding recipe: " + (result.message || "Unknown error"));
             }
         } catch (error) {
-            console.error("Ошибка при добавлении рецепта:", error);
-            alert("Произошла ошибка при добавлении рецепта.");
+            console.error("Error adding recipe:", error);
+            alert("An error occurred while adding the recipe.");
         }
     });
 });

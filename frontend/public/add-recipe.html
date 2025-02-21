@@ -16,7 +16,7 @@
     <div class="container">
         <div class="form-container">
             <h1>Add New Recipe</h1>
-            <form id="recipeForm"> <!-- Исправленный id -->
+            <form id="recipeForm"> 
                 <input type="text" id="title" placeholder="Recipe Title" required>
                 <textarea id="ingredients" placeholder="Ingredients (comma-separated)" required></textarea>
                 <textarea id="instructions" placeholder="Instructions" required></textarea>
@@ -40,14 +40,13 @@
        document.addEventListener("DOMContentLoaded", function () {
             const role = localStorage.getItem("role");
 
-            // Если пользователь не админ, перенаправляем на dashboard и показываем ошибку
             if (role !== "admin") {
-                alert("У вас нет доступа к этой странице.");
+                alert("You do not have access to this page.");
                 window.location.href = "dashboard.html";
             }
         });
     </script>
 
-    <script src="../scripts/recipes.js" defer></script> <!-- defer гарантирует загрузку после DOM -->
+    <script src="../scripts/recipes.js" defer></script> 
 </body>
 </html>

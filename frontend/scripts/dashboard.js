@@ -191,10 +191,18 @@ document.addEventListener("DOMContentLoaded", function () {
         if (event) event.preventDefault();
         try {
             console.log("Toggling like for recipe:", recipeId);
-
+    
             const token = localStorage.getItem("token");
-            if (!token) return;
-
+            if (!token) {
+                console.error("User not logged in");
+                return;
+            }
+    
+            const userId = localStorage.getItem("userId");
+            let likedRecipes = JSON.parse(localStorage.getItem("likedRecipes")) || {};
+    
+            const userLiked = likedRecipes[recipeId] || false;
+    
             const response = await fetch("http://localhost:5000/api/users/likes", {
                 method: "POST",
                 headers: {
@@ -203,19 +211,32 @@ document.addEventListener("DOMContentLoaded", function () {
                 },
                 body: JSON.stringify({ recipeId })
             });
-
+    
             if (!response.ok) throw new Error("Failed to update likes");
-
+    
             const data = await response.json();
             const likeButton = document.getElementById(`like-btn-${recipeId}`);
+    
+            if (userLiked) {
+                delete likedRecipes[recipeId]; 
+                data.likes.length--; 
+            } else {
+                likedRecipes[recipeId] = true; 
+                data.likes.length++; 
+            }
+    
+            localStorage.setItem("likedRecipes", JSON.stringify(likedRecipes));
+    
             if (likeButton) {
-                likeButton.innerHTML = `❤️ Like (${data.likes.length})`;
+                likeButton.innerHTML = `❤️ ${userLiked ? "Like" : "Unlike"} (${data.likes.length})`;
             }
         } catch (error) {
             console.error("Error updating likes:", error);
         }
     }
-
+    
+    
+    
     if (role !== "admin") {
         document.getElementById("showFavorites").addEventListener("click", showFavorites);
     } else {
