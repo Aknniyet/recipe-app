@@ -75,7 +75,7 @@ exports.getRecipes = async (req, res) => {
     }
 };
 
-// Retrieve a single recipe by ID*
+// Retrieve a single recipe by ID
 exports.getRecipeById = async (req, res) => {
     try {
         const recipe = await Recipe.findById(req.params.id)

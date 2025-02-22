@@ -7,7 +7,7 @@ const RecipeSchema = new mongoose.Schema({
     image: { type: String },
     category: { type: String, required: true, index: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] // Лайки
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }] 
 }, { timestamps: true });
 
 RecipeSchema.index({ title: "text", category: 1 });
